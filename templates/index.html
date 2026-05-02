@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TruthLens — Fake News Detection AI</title>
+  <meta name="description" content="AI-powered fake news detection using NLP, TF-IDF, and ensemble machine learning models. Classify news articles in real-time." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+  <!-- ─── Animated Background ─────────────────────────────── -->
+  <div class="bg-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- ─── Header ──────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            <path d="M11 8v6M8 11h6"/>
+          </svg>
+        </div>
+        <span class="logo-text">Truth<span class="accent">Lens</span></span>
+      </div>
+      <nav class="nav-pills">
+        <a href="#classifier" class="nav-pill active" id="nav-classify">Classify</a>
+        <a href="#performance" class="nav-pill" id="nav-perf">Performance</a>
+        <a href="#pipeline" class="nav-pill" id="nav-pipe">Pipeline</a>
+      </nav>
+      <div class="status-badge" id="status-badge">
+        <span class="status-dot"></span>
+        <span id="status-text">Loading…</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ─── Hero ─────────────────────────────────────────── -->
+    <section class="hero">
+      <div class="hero-tag">
+        <span>NLP · TF-IDF · Ensemble ML · Deep Learning</span>
+      </div>
+      <h1 class="hero-title">
+        Detect Fake News<br />
+        <span class="gradient-text">with AI Precision</span>
+      </h1>
+      <p class="hero-sub">
+        An end-to-end NLP pipeline stacking 6 machine learning architectures into a
+        unified ensemble — delivering real-time news authenticity classification.
+      </p>
+      <div class="hero-stats" id="hero-stats">
+        <div class="stat">
+          <span class="stat-val" id="stat-models">6</span>
+          <span class="stat-label">ML Models</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-val">TF-IDF</span>
+          <span class="stat-label">15K Features</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-val" id="stat-acc">—</span>
+          <span class="stat-label">Best Accuracy</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-val">Real-time</span>
+          <span class="stat-label">Classification</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Classifier ───────────────────────────────────── -->
+    <section class="section" id="classifier">
+      <div class="card glass-card classifier-card">
+        <div class="card-header">
+          <div class="card-icon card-icon--blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="card-title">Article Classifier</h2>
+            <p class="card-sub">Paste any news article to analyze its authenticity</p>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="textarea-wrapper">
+            <textarea
+              id="article-input"
+              class="article-textarea"
+              placeholder="Paste a news article here…&#10;&#10;Example: Scientists at MIT have published findings on climate change in the Nature journal. The government announced new guidelines following rising tensions in Brussels…"
+              rows="8"
+              spellcheck="true"
+            ></textarea>
+            <div class="textarea-footer">
+              <span id="word-counter" class="word-counter">0 words</span>
+              <div class="quick-demos">
+                <button class="demo-btn" id="demo-real" onclick="loadDemo('real')">Try Real News</button>
+                <button class="demo-btn" id="demo-fake" onclick="loadDemo('fake')">Try Fake News</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <button class="btn-primary" id="analyze-btn" onclick="analyzeArticle()">
+            <span class="btn-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </span>
+            <span id="btn-text">Analyze Article</span>
+          </button>
+          <button class="btn-ghost" onclick="clearAll()">Clear</button>
+        </div>
+
+        <!-- Result Panel -->
+        <div class="result-panel" id="result-panel" style="display:none;">
+
+          <!-- Verdict -->
+          <div class="verdict-banner" id="verdict-banner">
+            <div class="verdict-icon" id="verdict-icon"></div>
+            <div class="verdict-content">
+              <div class="verdict-label" id="verdict-label">REAL NEWS</div>
+              <div class="verdict-sub" id="verdict-sub">Ensemble confidence: 92%</div>
+            </div>
+            <div class="confidence-ring-wrapper">
+              <svg class="confidence-ring" viewBox="0 0 80 80" id="conf-svg">
+                <circle class="ring-bg" cx="40" cy="40" r="32"/>
+                <circle class="ring-fill" id="ring-fill" cx="40" cy="40" r="32"
+                  stroke-dasharray="201" stroke-dashoffset="201"/>
+              </svg>
+              <div class="ring-text" id="ring-text">0%</div>
+            </div>
+          </div>
+
+          <!-- Stats row -->
+          <div class="result-stats">
+            <div class="rstat">
+              <span class="rstat-label">Ensemble Vote</span>
+              <span class="rstat-val" id="res-ensemble">—</span>
+            </div>
+            <div class="rstat">
+              <span class="rstat-label">Majority Vote</span>
+              <span class="rstat-val" id="res-majority">—</span>
+            </div>
+            <div class="rstat">
+              <span class="rstat-label">Word Count</span>
+              <span class="rstat-val" id="res-words">—</span>
+            </div>
+            <div class="rstat">
+              <span class="rstat-label">Tokens (cleaned)</span>
+              <span class="rstat-val" id="res-tokens">—</span>
+            </div>
+          </div>
+
+          <!-- Model breakdown -->
+          <div class="model-breakdown">
+            <h3 class="breakdown-title">Model-by-Model Breakdown</h3>
+            <div class="model-grid" id="model-grid"></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Performance ──────────────────────────────────── -->
+    <section class="section" id="performance">
+      <div class="section-header">
+        <h2 class="section-title">Model Performance</h2>
+        <p class="section-sub">Comparative evaluation across architectures on held-out test set</p>
+      </div>
+
+      <div id="no-results-msg" class="info-banner" {% if results %}style="display:none"{% endif %}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span>Run <code>python run_training.py</code> to train models and populate metrics.</span>
+      </div>
+
+      <div id="perf-table-wrap" {% if not results %}style="display:none"{% endif %}>
+        <div class="table-card glass-card">
+          <table class="perf-table" id="perf-table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Accuracy</th>
+                <th>Precision</th>
+                <th>Recall</th>
+                <th>F1 Score</th>
+                <th>AUC-ROC</th>
+              </tr>
+            </thead>
+            <tbody id="perf-tbody">
+              {% for r in results %}
+              <tr class="{% if loop.last %}best-row{% endif %}">
+                <td class="model-name-cell">
+                  {% if loop.last %}<span class="champion-badge">★</span>{% endif %}
+                  {{ r.model }}
+                </td>
+                <td><div class="bar-cell"><div class="bar-fill" style="width:{{ (r.accuracy|float * 100)|int }}%"></div><span>{{ r.accuracy }}</span></div></td>
+                <td>{{ r.precision }}</td>
+                <td>{{ r.recall }}</td>
+                <td class="f1-cell">{{ r.f1 }}</td>
+                <td>{{ r.auc_roc if r.auc_roc != 'None' else '—' }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Bar chart -->
+        <div class="chart-card glass-card">
+          <h3 class="chart-title">F1 Score Comparison</h3>
+          <div class="bar-chart" id="bar-chart">
+            {% for r in results %}
+            <div class="chart-row">
+              <span class="chart-label">{{ r.model }}</span>
+              <div class="chart-bar-track">
+                <div class="chart-bar-fill {% if loop.last %}bar-ensemble{% endif %}"
+                     style="width: {{ (r.f1|float * 100)|int }}%"
+                     data-value="{{ r.f1 }}">
+                </div>
+              </div>
+              <span class="chart-val">{{ r.f1 }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Pipeline ─────────────────────────────────────── -->
+    <section class="section" id="pipeline">
+      <div class="section-header">
+        <h2 class="section-title">System Architecture</h2>
+        <p class="section-sub">End-to-end NLP pipeline from raw text to prediction</p>
+      </div>
+
+      <div class="pipeline-flow">
+
+        <div class="pipe-step">
+          <div class="pipe-icon pipe-icon--purple">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <h3 class="pipe-title">Raw Text Input</h3>
+          <p class="pipe-desc">News article text in any format — headlines, full articles, or excerpts</p>
+          <div class="pipe-tags"><span class="ptag">Flask API</span><span class="ptag">POST /predict</span></div>
+        </div>
+
+        <div class="pipe-arrow">→</div>
+
+        <div class="pipe-step">
+          <div class="pipe-icon pipe-icon--blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/>
+              <line x1="12" y1="4" x2="12" y2="20"/>
+            </svg>
+          </div>
+          <h3 class="pipe-title">NLP Preprocessing</h3>
+          <p class="pipe-desc">Lowercase → URL/HTML removal → stopword filtering → Porter stemming</p>
+          <div class="pipe-tags"><span class="ptag">NLTK</span><span class="ptag">Porter Stemmer</span></div>
+        </div>
+
+        <div class="pipe-arrow">→</div>
+
+        <div class="pipe-step">
+          <div class="pipe-icon pipe-icon--cyan">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+              <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <h3 class="pipe-title">TF-IDF Vectorization</h3>
+          <p class="pipe-desc">15,000 features, unigrams + bigrams, sublinear TF scaling</p>
+          <div class="pipe-tags"><span class="ptag">Scikit-learn</span><span class="ptag">n-gram (1,2)</span></div>
+        </div>
+
+        <div class="pipe-arrow">→</div>
+
+        <div class="pipe-step">
+          <div class="pipe-icon pipe-icon--orange">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+            </svg>
+          </div>
+          <h3 class="pipe-title">Ensemble Models</h3>
+          <p class="pipe-desc">6 base models (LR, NB, SVM, RF, GB, MLP) → Stacking meta-learner</p>
+          <div class="pipe-tags"><span class="ptag">Stacking</span><span class="ptag">Meta-Learner</span></div>
+        </div>
+
+        <div class="pipe-arrow">→</div>
+
+        <div class="pipe-step">
+          <div class="pipe-icon pipe-icon--green">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <h3 class="pipe-title">Verdict + Confidence</h3>
+          <p class="pipe-desc">Binary classification with per-model confidence scores and ensemble decision</p>
+          <div class="pipe-tags"><span class="ptag">REAL / FAKE</span><span class="ptag">Probability</span></div>
+        </div>
+
+      </div>
+
+      <!-- Tech stack -->
+      <div class="tech-grid">
+        <div class="tech-card glass-card">
+          <div class="tech-icon">🐍</div>
+          <div class="tech-name">Python 3.14</div>
+          <div class="tech-role">Runtime</div>
+        </div>
+        <div class="tech-card glass-card">
+          <div class="tech-icon">📊</div>
+          <div class="tech-name">Scikit-learn</div>
+          <div class="tech-role">ML Framework</div>
+        </div>
+        <div class="tech-card glass-card">
+          <div class="tech-icon">🔤</div>
+          <div class="tech-name">TF-IDF</div>
+          <div class="tech-role">Vectorization</div>
+        </div>
+        <div class="tech-card glass-card">
+          <div class="tech-icon">🧠</div>
+          <div class="tech-name">MLP Neural Net</div>
+          <div class="tech-role">Deep Learning</div>
+        </div>
+        <div class="tech-card glass-card">
+          <div class="tech-icon">🌐</div>
+          <div class="tech-name">Flask</div>
+          <div class="tech-role">Web Framework</div>
+        </div>
+        <div class="tech-card glass-card">
+          <div class="tech-icon">📝</div>
+          <div class="tech-name">NLTK</div>
+          <div class="tech-role">NLP Processing</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>TruthLens · Fake News Detection System · Built with Python, NLP & Scikit-learn</p>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
